@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sell At The Top — CG/Binance + CBBI (async)</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #111722;
+      --panel-2: #0f1520;
+      --panel-3: #0c121b;
+      --text: #e6edf3;
+      --muted: #8b9bb0;
+      --border: #1b2433;
+      --row: #0d1420;
+      --row2: #0b111c;
+      --progress: #2dd6c1;
+      --accent: #7dd3fc;
+      --danger: #ff5c6c;
+      --good: #35de88;
+      --loading: #0b1625;
+    }
+
+    @font-face {
+      font-family: "ElegantTypewriter";
+      src: url("assets/metropolis/Metropolis-Regular.otf") format("truetype");
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    * { box-sizing: border-box }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(1200px 800px at 20% -10%, rgba(20,198,200,.15), transparent 60%),
+        radial-gradient(1000px 700px at 120% 0%, rgba(61,214,237,.12), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      font-family: "ElegantTypewriter", monospace;
+    }
+
+    .wrap { max-width: 1250px; margin: 28px auto; padding: 0 18px 80px }
+
+    /* ===== Header ===== */
+    header {
+      display: flex; flex-direction: column; gap: 12px;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+      margin-bottom: 30px;
+    }
+
+    .top-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px }
+    .top-row h1 { margin: 0; font-size: 22px; margin-right: auto }
+
+    .linkBtn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border);
+      background: #0b1625; color: #cfe6ff; cursor: pointer; text-decoration: none;
+      font-size: 12px
+    }
+    .linkBtn img { height: 14px }
+
+    /* ===== Metrics cards (bars section) ===== */
+    .metrics { display: grid; grid-template-columns: 1fr; gap: 10px }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel-2), var(--panel-3));
+      border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+      display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
+    }
+    .card .title { color: var(--muted) }
+
+    .bar {
+      height: 14px; border-radius: 999px;
+      background: linear-gradient(90deg, #15ff00, #fbff00 55%, #ff0000);
+      border: 1px solid var(--border); position: relative; overflow: hidden;
+    }
+    .bar .marker {
+      position: absolute; top: -2px; width: 2px; height: 18px; background: white;
+      left: var(--pos, 0%); transition: left .25s ease;
+    }
+
+    .bar-alt {
+      height: 14px; border-radius: 999px;
+      background: linear-gradient(90deg,#1e3a8a,#3b82f6,#22d3ee,#34d399,#f59e0b,#ef4444);
+      border: 1px solid var(--border); position: relative; overflow: hidden;
+    }
+    .bar-alt .marker {
+      position: absolute; top: -2px; width: 2px; height: 18px; background: white;
+      left: var(--pos, 50%); transition: left .25s ease;
+    }
+    .bar-alt .label {
+      position: absolute; bottom: 100%; transform: translateX(-50%);
+      left: var(--pos, 50%); margin-bottom: 6px; background: #0b1625;
+      border: 1px solid var(--border); padding: 2px 6px; border-radius: 8px;
+      font-size: 12px; color: #d9ecff; white-space: nowrap;
+    }
+
+    /* ===== Table ===== */
+    .table {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    }
+
+    /* 10 columns */
+    .head, .row {
+      display: grid;
+      grid-template-columns:
+        30px minmax(220px,1.6fr) 1.6fr 1.8fr 50px 1.6fr 160px 120px 140px 90px;
+      gap: 12px; align-items: center; padding: 3px 12px;
+    }
+    .head {
+      position: sticky; top: 0;
+      background: linear-gradient(180deg, var(--panel-2), var(--panel-3));
+      color: #ffffff; border-bottom: 5px solid var(--border); font-size: 18px;
+    }
+    .row {
+      background: linear-gradient(180deg, var(--row), var(--row2));
+      border-bottom: 2px solid var(--border); font-size: 13px;
+    }
+    .row:nth-child(even) { background: linear-gradient(180deg, #0c141f, #0b121c) }
+
+    .progress {
+      height: 10px; border: 1px solid var(--border);
+      border-radius: 999px; background: #0b1625; position: relative;
+    }
+    .progress span {
+      position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px;
+      width: var(--w, 0%);
+      background: linear-gradient(90deg, var(--progress), #6be3ff);
+    }
+
+    code { background: #0b1625; border: 1px solid var(--border); padding: 3px 6px; border-radius: 6px }
+    .info { display: inline-flex; align-items: center; gap: 6px }
+
+    /* Tooltip icon using PNG */
+    .tip { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; cursor: default }
+    .tip::before { content: ""; display: block; width: 16px; height: 16px; background: url("assets/information_1.png") no-repeat center/contain }
+    .tip span {
+      visibility: hidden; opacity: 0; transition: .15s; position: absolute;
+      left: 28px; top: 50%; transform: translateY(-50%);
+      background: #0b1625; border: 1px solid var(--border); color: #d6e3f5;
+      padding: 8px 10px; max-width: 420px; line-height: 1.4; border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35); z-index: 10;
+    }
+    .tip:hover span { visibility: visible; opacity: 1 }
+
+    .bad { color: var(--danger) }
+    .ok { color: var(--good) }
+
+    .editBtn, .linkBtn.sm {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;
+      border-radius: 6px; border: 1px solid var(--border); background: #0b1625;
+      color: #d3e7ff; cursor: pointer; text-decoration: none; font-size: 13px;
+    }
+    .editBtn:hover, .linkBtn:hover { filter: brightness(1.15) }
+    .editBtn img, .linkBtn img { height: 16px; vertical-align: middle }
+    .controls { display: flex; gap: 8px; align-items: center }
+    .small { font-size: 12px; opacity: .9 }
+
+    /* Loading cell */
+    .loading { color: #8aa8c9; background: var(--loading); border: 1px dashed var(--border); border-radius: 6px; padding: 4px 6px; display: inline-block }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="top-row">
+        <h1>Bull Market Peak Indicators - sell at the TOP</h1>
+        <span id="updated" class="linkBtn">Update Time: —</span>
+        <span id="rowsCount" class="linkBtn">Rows: 0</span>
+        <span id="hitsCount" class="linkBtn">Hits: 0 / 0</span>
+        <button id="exportBtn" class="linkBtn" title="Export JSON">
+          <img src="assets/export_1.png" alt="export" />
+        </button>
+        <button id="importBtn" class="linkBtn" title="Import JSON">
+          <img src="assets/import_1.png" alt="import" />
+        </button>
+        <button id="clearBtn" class="linkBtn" title="Clear manual">
+          <img src="assets/delete_1.png" alt="delete" />
+        </button>
+      </div>
+
+      <!-- Metrics section below header -->
+      <div class="metrics">
+        <!-- Hold/Sell aggregate bar -->
+        <div class="card" id="holdCard">
+          <div class="title" id="holdTitle">Hold</div>
+          <div class="bar"><span class="marker" id="holdMarker"></span></div>
+          <div id="sellLabel" class="title">0% Sell</div>
+        </div>
+
+        <!-- Altseason index bar (0 = BTC season, 100 = Altseason) -->
+        <div class="card" id="altCard">
+          <div id="altLeft" class="title">Bitcoin Season</div>
+          <div class="bar-alt" id="altBar">
+            <span class="marker" id="altMarker"></span>
+            <span class="label" id="altLabel">Index: —</span>
+          </div>
+          <div id="altRight" class="title">Altcoin Season</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="table">
+      <div class="head">
+        <div>#</div>
+        <div>Indicator</div>
+        <div>Current</div>
+        <div>Reference</div>
+        <div>Hit</div>
+        <div>Distance</div>
+        <div>Timestamp (UTC)</div>
+        <div>Source</div>
+        <div>Progress</div>
+        <div>Link</div>
+      </div>
+      <div id="rows"></div>
+    </section>
+  </div>
+
+  <script>
+    // ===========================
+    // CONFIG & DISPLAY ORDER (unchanged)
+    // ===========================
+    const CBBI_URL = "https://colintalkscrypto.com/cbbi/data/latest.json";
+    const DESIRED_ORDER = [
+      'Ahr999','PiCycleTop','Confidence','PuellMultiple','Rainbow','ETFNetOutflowsDays','ETFBTCratio',
+      'TwoYearMAx5','MVRVZscore','BubbleIdx','USDTSavings','RSI22D','Altseason','Dominance',
+      'LTHSupply','STHSupplyPct','ReserveRisk','NUPL','RHODLratio','BMO','MVRVratio','FourYearMA',
+      'CBBI','MayerMultiple','PiCycleEscape','MicroSTcost','Trend','Ann90D','TerminalPrice','GRM','Price'
+    ];
+    const ORDER_INDEX = new Map(DESIRED_ORDER.map((k,i)=>[k,i]));
+
+    // ===========================
+    // SMALL UTILITIES (unchanged helpers + a few extras)
+    // ===========================
+    const fmt = (n) => {
+      if (n==null || Number.isNaN(n)) return '—';
+      if (Math.abs(n) >= 1e12) return (n/1e12).toFixed(2)+'T';
+      if (Math.abs(n) >= 1e9)  return (n/1e9).toFixed(2)+'B';
+      if (Math.abs(n) >= 1e6)  return (n/1e6).toFixed(2)+'M';
+      if (Math.abs(n) >= 1e3)  return (n/1e3).toFixed(1)+'k';
+      if (Math.abs(n) < 1 && n !== 0) return n.toPrecision(3);
+      return (''+Number(n).toFixed(4)).replace(/\.?0+$/,'');
+    };
+
+    const jget = (u) => fetch(u,{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+
+    function hit(op, cur, ref){
+      if (cur==null || Number.isNaN(cur) || ref==null || Number.isNaN(ref)) return {h:false,d:NaN};
+      switch(op){
+        case '>=': return { h: cur>=ref, d: Math.max(0, ref-cur) };
+        case '<=': return { h: cur<=ref, d: Math.max(0, cur-ref) };
+        default:   return { h:false, d:NaN };
+      }
+    }
+
+    function movingAverage(arr, p){
+      const out=[]; let s=0;
+      for(let i=0;i<arr.length;i++){
+        s+=arr[i]; if(i>=p) s-=arr[i-p];
+        if(i>=p-1) out.push(s/p);
+      }
+      return out;
+    }
+
+    function RSI(closes, period=22){
+      if(!closes || closes.length < period+1) return NaN;
+      let g=0,l=0;
+      for(let i=1;i<=period;i++){
+        const d=closes[i]-closes[i-1]; if(d>=0) g+=d; else l-=d;
+      }
+      g/=period; l/=period;
+      for(let i=period+1;i<closes.length;i++){
+        const d=closes[i]-closes[i-1];
+        g=(g*(period-1)+(d>0?d:0))/period;
+        l=(l*(period-1)+(d<0?-d:0))/period;
+      }
+      const rs = l===0 ? 100 : g/l; return 100-100/(1+rs);
+    }
+
+    function progressPercent(op, cur, refNum){
+      if(!op || refNum==null || !Number.isFinite(refNum)) return null;
+      if(!Number.isFinite(cur)) return 0;
+      if(op === '>=') return Math.max(0, Math.min(100, (cur/refNum)*100));
+      if(op === '<=') return Math.max(0, Math.min(100, (refNum/cur)*100));
+      return null;
+    }
+
+    // ---------------- Local persistence for manual values
+    const LS_KEY = 'manualIndicatorValues_v1';
+    const readLS   = () => { try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); } catch { return {} } };
+    const writeLS  = (map) => localStorage.setItem(LS_KEY, JSON.stringify(map));
+    const getManual= (key) => readLS()[key];
+    const setManual= (key, payload) => { const m=readLS(); m[key]=payload; writeLS(m) };
+    const clearManual = () => writeLS({});
+
+    function editManual(key, name, op, refNum){
+      const curStr = prompt(`Setează valoarea curentă pentru\n${name}\n(op=${op||'—'}, ref=${refNum??'—'})`, getManual(key)?.cur ?? '');
+      if(curStr===null) return;
+      const cur = Number(curStr);
+      if(!Number.isFinite(cur)) { alert('Valoare invalidă.'); return; }
+      const src = prompt('Sursa (ex: manual / link scurt):', getManual(key)?.src || 'manual');
+      const t = new Date().toISOString().replace('T',' ').slice(0,19);
+      setManual(key, { cur, src, t });
+      // live update the row immediately
+      updateSingleRow(key, { cur, src, t });
+    }
+
+    // ---------------- Linkuri (fallback)
+    const LINKS = {
+      CBBI:'https://colintalkscrypto.com/cbbi/',
+      ReserveRisk:'https://lookintobitcoin.com/charts/reserve-risk/',
+      PuellMultiple:'https://lookintobitcoin.com/charts/puell-multiple/',
+      MVRVZscore:'https://lookintobitcoin.com/charts/mvrv-zscore/',
+      RHODLratio:'https://lookintobitcoin.com/charts/rhodl-ratio/',
+      NUPL:'https://www.checkonchain.com/indicators/nupL',
+      GoldenRatioMultiplier:'https://charts.bitbo.io/golden-ratio/',
+      HashRibbons:'https://www.capriole.com/insights/hash-ribbons/',
+      PiCycleTop:'https://www.lookintobitcoin.com/charts/pi-cycle-top-indicator/',
+      TwoYearMAx5:'https://www.bitcoinmagazinepro.com/charts/bitcoin-investor-tool/',
+      RSI22D:'https://charts.bitbo.io/monthly-rsi/',
+      MayerMultiple:'https://charts.bitbo.io/mayer-multiple-bars/',
+      GRM:'https://charts.bitbo.io/golden-ratio/',
+      Ann90D:'https://www.bullionbypost.co.uk/bitcoin-price/bitcoin-price-3-month-usd/',
+      Price:'https://www.coingecko.com/en/coins/bitcoin',
+      RUPL:'https://www.bitcoinmagazinepro.com/charts/relative-unrealized-profit--loss/',
+      Trolololo:'https://charts.bitbo.io/original-rainbow/',
+      '2YMA':'https://www.lookintobitcoin.com/charts/2-year-ma-multiplier/',
+      Woobull:'https://woobull.com/',
+      Confidence:'https://colintalkscrypto.com/cbbi/'
+    };
+
+    // Tooltips
+    const DESCR = {
+      Dominance:'Pondere BTC în market cap cripto',
+      CBBI:'Indice compozit (0—100) pentru probabilitatea de top',
+      ReserveRisk:'preț / (încrederea HODLerilor)',
+      PuellMultiple:'Venit mineri / media anuală',
+      MVRVZscore:'Z-score al MVRV',
+      RHODLratio:'Raport bogăție monede tinere vs vechi',
+      NUPL:'Net Unrealized Profit/Loss',
+      GoldenRatioMultiplier:'Multiplicatori pe bază de φ',
+      HashRibbons:'Capitulare/recuperare mineri',
+      PiCycleTop:'MA111 vs 2×MA350',
+      TwoYearMAx5:'Preț vs MA730×5',
+      RSI22D:'RSI 22 zile',
+      MayerMultiple:'Preț / MA200',
+      GRM:'1.1618 × MA350',
+      Ann90D:'Randament anualizat 90z',
+      Price:'Preț BTC din CBBI',
+      RUPL:'Realized/Unrealized PL',
+      Trolololo:'Indicator experimental',
+      '2YMA':'Media mobilă pe 2 ani',
+      Woobull:'Indicator Willy Woo',
+      Confidence:'Scor de încredere agregat',
+      Ahr999: 'Indice compus; semnal de top ≈4+',
+      Rainbow: 'Zonare preț pe benzi (Rainbow)'
+    };
+
+    // ===========================
+    // SHARED BUS (with caching)
+    // ===========================
+    const Bus = {
+      _prices: null,
+      _dominance: null,
+      async prices(){
+        if(this._prices) return this._prices;
+        try{
+          const r = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=2000');
+          const j = await r.json();
+          const closes = (j.prices||[]).map(p=>p[1]);
+          if(closes.length){
+            const now = closes.at(-1);
+            this._prices = { closes, now, src:'CoinGecko' };
+            return this._prices;
+          }
+        }catch(e){}
+        // Fallback to Binance if CG fails
+        const p1 = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000');
+        const a1 = await p1.json();
+        const start = a1[a1.length-1][0] + 86400000;
+        const p2 = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&startTime=${start}&limit=1000`);
+        const a2 = await p2.json();
+        const arr = [...a1, ...a2];
+        const closes = arr.map(x=>+x[4]);
+        const now = closes.at(-1);
+        this._prices = { closes, now, src:'Binance' };
+        return this._prices;
+      },
+      async dominance(){
+        if(this._dominance!=null) return this._dominance;
+        const j = await jget('https://api.coingecko.com/api/v3/global');
+        this._dominance = (j.data ? j.data.market_cap_percentage.btc : j.market_cap_percentage.btc);
+        return this._dominance;
+      }
+    };
+
+    // ===========================
+    // INDICATOR DEFINITIONS (same sources, same set), but each exposes an async loader
+    // ===========================
+    let tvOffset = 2; // TV vs CG dominance offset
+
+    // Base
+    const DEF_BASE = [
+      { key:'Dominance', name:'Bitcoin Dominance', op:'<=', refNum:45, link:LINKS.Dominance, editable:false,
+        loader: async ()=>{
+          const dom = await Bus.dominance();
+          const cur = dom + tvOffset; const H = hit('<=', cur, 45);
+          return { cur, h:H.h, d:H.d, t:tsNow(), src:'CoinGecko' };
+        }
+      }
+    ];
+
+    // Price-derived
+    const DEF_PRICE = [
+      { key:'PiCycleTop', name:'Pi Cycle Top', op:'>=', refNum:1, editable:false,
+        loader: async()=>{
+          const {closes,src}=await Bus.prices();
+          const ma350=movingAverage(closes,350).at(-1);
+          const ma111=movingAverage(closes,111).at(-1);
+          const ratio=ma111/(2*ma350);
+          const H=hit('>=', ratio, 1);
+          return { cur:ratio, h:H.h, d:H.d, t:tsNow(), src:`${src} (calc)` };
+        }
+      },
+      { key:'TwoYearMAx5', name:'2-Year MA Multiplier (×5)', op:'>=', refNum:355600, editable:false,
+        loader: async()=>{
+          const {closes,now,src}=await Bus.prices();
+          const ma730=movingAverage(closes,730).at(-1);
+          const thr=ma730*5; const H=hit('>=', now, thr);
+          return { cur:now, refNum:thr, op:'>=', h:H.h, d:H.d, t:tsNow(), src:`${src} (calc)` };
+        }
+      },
+      { key:'RSI22D', name:'RSI — 22 Day', op:'>=', refNum:80, editable:false,
+        loader: async()=>{
+          const {closes,src}=await Bus.prices();
+          const r=RSI(closes,22); const H=hit('>=', r, 80);
+          return { cur:r, h:H.h, d:H.d, t:tsNow(), src:`${src} (calc)` };
+        }
+      },
+      { key:'MayerMultiple', name:'Mayer Multiple', op:'>=', refNum:2.2, editable:false,
+        loader: async()=>{
+          const {closes,now,src}=await Bus.prices();
+          const ma200=movingAverage(closes,200).at(-1);
+          const mm=now/ma200; const H=hit('>=', mm, 2.2);
+          return { cur:mm, h:H.h, d:H.d, t:tsNow(), src:`${src} (calc)` };
+        }
+      },
+      { key:'GRM', name:'Golden Ratio (φ · MA350)', op:'>=', refNum:150700, editable:false,
+        loader: async()=>{
+          const {closes,now,src}=await Bus.prices();
+          const phi=1.61803398875;
+          const ma350=movingAverage(closes,350).at(-1);
+          const thr=ma350*Math.pow(phi,1);
+          const H=hit('>=', now, thr);
+          return { cur:now, refNum:thr, op:'>=', h:H.h, d:H.d, t:tsNow(), src:`${src} (calc)` };
+        }
+      },
+    ];
+
+    // CBBI (single fetch → fan-out updates)
+    const CBBI_SERIES_META = [
+      // { key:'CBBI',              name:'CBBI Aggregate Score',      thr:['>=',90] },
+      { key:'PuellMultiple',     name:'Puell Multiple',            thr:['>=',2] },
+      // { key:'NUPL',              name:'NUPL',                      thr:['>=',70], scale:100 },
+      // { key:'GoldenRatioMultiplier', name:'Golden Ratio Multiplier', thr:null },
+      // { key:'HashRibbons',       name:'Hash Ribbons',              thr:null },
+      { key:'Price',             name:"Bitcoin Smithson's Forecast", thr:['>=',175000] },
+      { key:'RUPL',              name:'RUPL',                      thr:['>=',15] },
+      { key:'Trolololo',         name:'Trolololo',                 thr:['>=',1.4] },
+      { key:'Confidence',        name:'CBBI Confidence',           thr:['>=',0.9] }
+    ];
+
+    const SERIES_ALIASES = {
+      CBBI:['cbbi','CBBI','score'],
+      ReserveRisk:['ReserveRisk','Reserve_Risk','reserve_risk'],
+      PuellMultiple:['PuellMultiple','Puell_Multiple','puell_multiple','Puell'],
+      MVRVZscore:['MVRVZscore','MVRV_Z','MVRV_Zscore','mvrv_z','MVRV'],
+      RHODLratio:['RHODLratio','RHODLRatio','rhodel_ratio','rhOdl_ratio','RHODL'],
+      NUPL:['NUPL','Nupl','n_u_p_l'],
+      GoldenRatioMultiplier:['GoldenRatioMultiplier','Golden_Ratio','golden_ratio_multiplier'],
+      HashRibbons:['HashRibbons','Hash_Ribbons','hash_ribbons'],
+      PiCycleTop:['PiCycleTop','Pi_Cycle_Top','PiCycle'],
+      Price:['Price','price','BTC'],
+      RUPL:['RUPL','rupl','Rupl'],
+      Trolololo:['Trolololo','trolololo','trololo','Trololo'],
+      '2YMA':['2YMA','2yma','TwoYearMA','two_year_ma'],
+      Woobull:['Woobull','woobull','WooBull'],
+      Confidence:['Confidence','confidence','conf']
+    };
+
+    function pickKey(obj, aliases){
+      for(const k of aliases){ if(k in obj) return k; if(obj.data && k in obj.data) return 'data.'+k; }
+      return null;
+    }
+    function getByPath(o, path){ if(!path) return undefined; if(!path.includes('.')) return o[path]; const [p,rest]=path.split(/\.(.*)/); return getByPath(o[p],rest); }
+    function latestKV(obj){
+      if(typeof obj==='number') return { ts: Math.floor(Date.now()/1000), val: obj };
+      const entries = Object.entries(obj||{})
+        .map(([ts,v])=>[Number(ts),v])
+        .filter(([t,v])=>v!=null && Number.isFinite(Number(v)));
+      if(!entries.length) return {ts:null,val:null};
+      entries.sort((a,b)=>a[0]-b[0]);
+      const [ts,val]=entries[entries.length-1];
+      return { ts, val:Number(val) };
+    }
+
+    // Manual-only placeholders (same as before)
+    const DEF_MANUAL = [
+      { key:'Ahr999',            name:'Bitcoin Ahr999 Index',               op:'>=', refNum:2.3,      link:'https://www.tradingdigits.io/bitcoin-ahr999', editable:true },
+      { key:'Rainbow',           name:'Bitcoin Rainbow Chart',              op:'>=', refNum:5,      link:'https://charts.bitbo.io/original-rainbow/',  editable:true },
+      { key:'ETFNetOutflowsDays',name:'Days of ETF Net Outflows',           op:'>=', refNum:10,     link:'https://bitbo.io/treasuries/etf-flows',      editable:true },
+      // { key:'ETFBTCratio',    name:'ETF-to-BTC Ratio',                   op:'<=', refNum:3.5,    link:'https://www.google.com/',                   editable:true },
+      { key:'BubbleIdx',         name:'Bitcoin Bubble Index',               op:'>=', refNum:80,     link:'https://www.coinglass.com/pro/i/bitcoinBubble', editable:true },
+      { key:'USDTSavings',       name:'USDT Flexible Savings %',            op:'>=', refNum:29,     link:'https://www.binance.com/en/savings',        editable:true },
+      { key:'Altseason',         name:'Altcoin Season Index',               op:'>=', refNum:75,     link:'https://www.blockchaincenter.net/en/altcoin-season-index/', editable:true },
+      { key:'LTHSupply',         name:'Bitcoin Long Term Holder Supply',    op:'<=', refNum:13.5e6, link:'https://www.coinglass.com/pro/i/long-term-holder-supply', editable:true },
+      { key:'STHSupplyPct',      name:'Bitcoin Short Term Holder Supply',   op:'>=', refNum:5.5e6,  link:'https://www.coinglass.com/pro/i/short-term-holder-supply', editable:true },
+      { key:'BMO',               name:'Bitcoin Macro Oscillator (BMO)',     op:'>=', refNum:1.4,    link:'https://www.coinglass.com/pro/i/oscillator', editable:true },
+      { key:'MVRVratio',         name:'Bitcoin MVRV Ratio',                 op:'>=', refNum:4,      link:'https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/', editable:true },
+      { key:'FourYearMA',        name:'Bitcoin 4-Year Moving Average',      op:'>=', refNum:3.5,    link:'https://www.coinglass.com/pro/i/four-year-moving-average', editable:true },
+      { key:'PiCycleEscape',     name:'Bitcoin AHR999: Top Escape Indicator',op:'>=', refNum:4.45,  link:'https://www.coinglass.com/pro/i/ahr999-escape', editable:true },
+      { key:'MicroSTcost',       name:'MicroStrategy Avg Bitcoin Cost',     op:'>=', refNum:155655, link:'https://bitbo.io/treasuries/microstrategy/#:~:text=MicroStrategy%20owns%20628%2C946%20bitcoins%20as,cost%20of%20%2433.139%20billion%20USD.', editable:true },
+      // { key:'Trend',          name:'Bitcoin Trend Indicator',            op:'>=', refNum:7,      link:'https://indices.coindesk.com/bitcoin-trend-indicators', editable:true },
+      // { key:'Ann90D',            name:'Annualized 90D Return',              op:'>=', refNum:null,   link:'https://www.bullionbypost.co.uk/bitcoin-price/bitcoin-price-3-month-usd/', editable:true },
+      // { key:'TerminalPrice',  name:'Bitcoin Terminal Price',             op:'>=', refNum:187702, link:'https://www.bitcoinmagazinepro.com/charts/terminal-price/', editable:true },
+    ];
+
+    // ----- UI refs
+    const rowsEl = document.getElementById('rows');
+    const holdTitleEl = document.getElementById('holdTitle');
+
+    // ===========================
+    // RENDERING
+    // ===========================
+    const rowRefs = new Map(); // key -> {el, meta}
+
+    function tsNow(){ return new Date().toISOString().replace('T',' ').slice(0,19); }
+
+    function linkFor(obj){
+      if (obj.link) return obj.link;
+      const key = obj.key || obj.name;
+      const base = LINKS[key] || LINKS[obj.name] || null;
+      const fallback = `https://www.google.com/search?q=${encodeURIComponent(obj.name+' bitcoin indicator')}`;
+      return base || fallback;
+    }
+
+    function skeletonRow(idx, meta){
+      const el = document.createElement('div');
+      el.className = 'row';
+      const href = linkFor(meta);
+      const desc = DESCR[meta.key] || DESCR[meta.name?.split(' ')[0]] || '';
+      const refStr = meta.op ? `${meta.op} ${fmt(meta.refNum)}` : '—';
+      const lastCell = meta.editable
+        ? `<div class="controls">
+             <a class="linkBtn sm" href="${href}" target="_blank"><img src="assets/bar-chart_1.png" alt="open"></a>
+             <button class="editBtn" onclick="editManual('${meta.key}','${meta.name.replace(/'/g,"\\'")}', '${meta.op||''}', ${meta.refNum??'null'})"><img src="assets/pencil_1.png" alt="edit"></button>
+           </div>`
+        : `<div><a class="linkBtn sm" href="${href}" target="_blank"><img src="assets/bar-chart_1.png" alt="open"></a></div>`;
+
+      el.innerHTML = `
+        <div class="idx">${idx}</div>
+        <div class="info"><span class="tip"><span>${desc || 'No description available.'}</span></span>${meta.name}</div>
+        <div class="cur"><span class="loading">loading…</span></div>
+        <div class="ref"><code>${refStr}</code></div>
+        <div class="hit"><span class="small">—</span></div>
+        <div class="dist">—</div>
+        <div class="ts">—</div>
+        <div class="src">—</div>
+        <div class="prog">—</div>
+        ${lastCell}`;
+      return el;
+    }
+
+    function applyRow(el, obj){
+      const p = progressPercent(obj.op, obj.cur, obj.refNum ?? (obj.op? Number((obj.ref||'').replace(/[^\d.]/g,'')) : null));
+      const pHTML = (p==null)
+        ? '—'
+        : `<div class='progress' title="${p.toFixed(1)}%"><span style="--w:${Math.min(100,Math.max(0,p)).toFixed(2)}%"></span></div>`;
+      const refStr = obj.ref || (obj.op? `${obj.op} ${fmt(obj.refNum)}` : '—');
+      el.querySelector('.cur').textContent = fmt(obj.cur);
+      el.querySelector('.ref').innerHTML = `<code>${refStr}</code>`;
+      el.querySelector('.hit').innerHTML = `<span class="${obj.h ? 'ok' : 'bad'}"><img src="assets/${obj.h?'check.png':'cross.png'}" alt="hit" style="height:16px;vertical-align:middle"></span>`;
+      el.querySelector('.dist').textContent = fmt(obj.d);
+      el.querySelector('.ts').textContent = obj.t || '—';
+      el.querySelector('.src').textContent = obj.src || '—';
+      el.querySelector('.prog').innerHTML = pHTML;
+    }
+
+    function recalcHeader(){
+      const rows = Array.from(rowRefs.values());
+      const filled = rows.filter(r=>r.data && typeof r.data.h === 'boolean');
+      const hits = filled.filter(r=>r.data.h).length;
+      const total = filled.length;
+      const sellPct = total>0 ? Math.round((hits/total)*100) : 0;
+      const holdPct = 100 - sellPct;
+      document.getElementById('rowsCount').textContent = 'Rows: '+rows.length;
+      document.getElementById('hitsCount').textContent = `Hits: ${hits} / ${total}`;
+      document.getElementById('sellLabel').textContent = sellPct + '% Sell';
+      holdTitleEl.textContent = 'Hold ' + holdPct + '%';
+      document.getElementById('holdMarker').style.setProperty('--pos', sellPct + '%');
+    }
+
+    function numberRows(){
+      let i=1; for(const key of Array.from(rowRefs.keys())){
+        const el = rowRefs.get(key).el; el.querySelector('.idx').textContent = i; i++;
+      }
+    }
+
+    function insertRowsInOrder(keys){
+    rowsEl.innerHTML = '';
+    const ordered = keys.slice().sort((a,b)=>{
+    const ia = ORDER_INDEX.has(a) ? ORDER_INDEX.get(a) : 9e6;
+    const ib = ORDER_INDEX.has(b) ? ORDER_INDEX.get(b) : 9e6;
+    return ia-ib;
+    });
+    let idx=1;
+    for(const k of ordered){
+    const rr = rowRefs.get(k);
+    if(!rr) continue;
+    const el = skeletonRow(idx, rr.meta);
+    rowsEl.appendChild(el);
+    rr.el = el;
+    idx++;
+    }
+    }
+
+    // >>> FIX: carry over op/refNum from loaders (e.g., CBBI JSON fan-out) and persist to meta so the Reference cell shows correctly and progress/hit use them.
+    function updateSingleRow(key, partial){
+      const rr = rowRefs.get(key); if(!rr || !rr.el) return;
+      // Prefer explicit op/refNum coming from the data provider; fall back to meta.
+      const op = (partial.op !== undefined ? partial.op : rr.meta.op);
+      const refNum = (partial.refNum !== undefined ? partial.refNum : rr.meta.refNum);
+      // Persist onto meta so future renders/skeletons have it.
+      if (op !== undefined) rr.meta.op = op;
+      if (refNum !== undefined) rr.meta.refNum = refNum;
+
+      const cur = (partial.cur!=null) ? partial.cur : rr.data?.cur;
+      const src = partial.src || rr.data?.src || rr.meta.src;
+      const t   = partial.t   || rr.data?.t   || tsNow();
+
+      const H = (Number.isFinite(cur) && refNum!=null && op) ? hit(op, cur, refNum) : {h:false,d:NaN};
+
+      const rowData = { key, name:rr.meta.name, op, refNum, cur, h:H.h, d:H.d, t, src };
+      rr.data = rowData;
+      applyRow(rr.el, rowData);
+      recalcHeader();
+    }
+
+    // ===========================
+    // LOADERS (concurrent)
+    // ===========================
+    async function fetchAltseasonIndex(){
+      try {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const targetUrl = 'https://www.blockchaincenter.net/en/altcoin-season-index/';
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+        const html = await response.text();
+        let altseasonValue = null;
+        const mainPattern = /<div[^>]*font-size:\s*\d+px[^>]*>(\d{1,2})<\/div>/i;
+        const mainMatch = html.match(mainPattern);
+        if (mainMatch) {
+          const value = parseInt(mainMatch[1]);
+          if (value >= 0 && value <= 100) { altseasonValue = value; }
+        }
+        if (altseasonValue === null) {
+          const fallbackPatterns = [
+            /<div[^>]*style="[^"]*font-size:\s*\d+px[^"]*"[^>]*>(\d{1,2})<\/div>/i,
+            /<div[^>]*class="[^"]*(?:index|score|value)[^"]*"[^>]*>(\d{1,2})<\/div>/i,
+            /<div[^>]*>(\d{1,2})<\/div>/g
+          ];
+          for (let pattern of fallbackPatterns) {
+            if (pattern.global) {
+              let match;
+              while ((match = pattern.exec(html)) !== null) {
+                const num = parseInt(match[1]);
+                if (num >= 0 && num <= 100 && num !== 88) { altseasonValue = num; break; }
+              }
+              if (altseasonValue !== null) break;
+            } else {
+              const match = html.match(pattern);
+              if (match) { const num = parseInt(match[1]); if (num >= 0 && num <= 100 && num !== 88) { altseasonValue = num; break; } }
+            }
+          }
+        }
+        if (altseasonValue !== null) { return { val: altseasonValue, src: 'blockchaincenter' }; }
+        else { throw new Error('Could not extract value from HTML'); }
+      } catch (err) {
+        console.error('Altseason fetch error', err);
+        return null;
+      }
+    }
+
+    function buildMetaMap(){
+      const metas = new Map();
+      // Base
+      for(const m of DEF_BASE){ metas.set(m.key, m); }
+      // Price-derived
+      for(const m of DEF_PRICE){ metas.set(m.key, m); }
+      // CBBI series (meta only; values come from one fetch)
+      for(const m of CBBI_SERIES_META){ metas.set(m.key, { key:m.key, name:m.name, editable:false }); }
+      // Manual placeholders
+      for(const m of DEF_MANUAL){ metas.set(m.key, m); }
+      // Filter strictly to the keys that were actually shown before (via our definitions)
+      const keys = Array.from(metas.keys());
+      return { metas, keys };
+    }
+
+    async function load(){
+      document.getElementById('updated').textContent = 'Update Time: ' + new Date().toLocaleString();
+      // Build meta registry, then draw skeletons in the configured order
+      const { metas, keys } = buildMetaMap();
+      // Seed rowRefs and mount skeleton rows
+      rowRefs.clear();
+      keys.forEach(k=> rowRefs.set(k, { el:null, meta: metas.get(k), data:null }));
+      insertRowsInOrder(keys);
+      numberRows();
+      recalcHeader();
+
+      // ---------- Kick off async loaders (in parallel)
+      // 1) Base & Price indicators: run independently
+      const baseAndPrice = [...DEF_BASE, ...DEF_PRICE];
+      baseAndPrice.forEach(def => {
+        def.loader().then(res=>{
+          updateSingleRow(def.key, res);
+        }).catch(()=>{});
+      });
+
+      // 2) CBBI fetch once, then update all its rows
+      (async ()=>{
+        try{
+          const j = await jget(CBBI_URL);
+          for(const meta of CBBI_SERIES_META){
+            let ts, val;
+            const keyPath = pickKey(j, SERIES_ALIASES[meta.key]||[meta.key]);
+            if(!keyPath) continue;
+            if(meta.key==='CBBI'){
+              const agg = Number(j.cbbi ?? j.data?.cbbi ?? j.score ?? j.latest?.cbbi ?? getByPath(j,keyPath));
+              if(!Number.isFinite(agg)) continue;
+              ts = Math.floor(Date.now()/1000); val = agg;
+            } else {
+              const raw = getByPath(j, keyPath); ({ts,val} = latestKV(raw));
+              if(ts==null) continue;
+            }
+            let value = meta.scale ? val*meta.scale : val;
+            if (meta.key === 'PuellMultiple') { value = value * 1.342; }
+            let op=null, refNum=null;
+            if(meta.thr){ op = meta.thr[0]; refNum = meta.thr[1]; }
+            const H = (op && refNum!=null) ? hit(op, value, refNum) : {h:false,d:NaN};
+            updateSingleRow(meta.key, { cur:value, op, refNum, h:H.h, d:H.d, t:new Date(ts*1000).toISOString().replace('T',' ').slice(0,19), src:'CBBI JSON' });
+          }
+        }catch(e){ console.error(e); }
+      })();
+
+      // 3) Altseason live (overwrites manual if available)
+      (async ()=>{
+        try{
+          const fetched = await fetchAltseasonIndex();
+          if(fetched){
+            const altVal = Math.max(0, Math.min(100, Number(fetched.val)));
+            const op='>=', refNum=75; const H = hit(op, altVal, refNum);
+            updateSingleRow('Altseason', {
+              cur:altVal, op, refNum, h:H.h, d:H.d,
+              t:tsNow(), src:fetched.src,
+              link:'https://www.blockchaincenter.net/en/altcoin-season-index/'
+            });
+            // Update bar visual
+            renderAltBar(altVal);
+          } else {
+            // try manual fallback
+            const m = getManual('Altseason');
+            if(m && Number.isFinite(m.cur)){
+              renderAltBar(m.cur);
+            }
+          }
+        }catch(e){ console.error(e); }
+      })();
+
+      // 4) Manual placeholders: resolve from LS immediately (no blocking)
+      DEF_MANUAL.forEach(m=>{
+        const v = getManual(m.key);
+        if(v && Number.isFinite(v.cur)){
+          updateSingleRow(m.key, { cur:v.cur, src:v.src||'manual', t:v.t||'—' });
+        }
+      });
+    }
+
+    function renderAltBar(altVal){
+      const altMarker = document.getElementById('altMarker');
+      const altLabel = document.getElementById('altLabel');
+      const leftLbl = document.getElementById('altLeft');
+      const rightLbl = document.getElementById('altRight');
+      if(altMarker){
+        altMarker.style.setProperty('--pos', altVal + '%');
+        altLabel.style.setProperty('--pos', altVal + '%');
+        altLabel.textContent = `Index: ${(+altVal).toFixed(0)}`;
+        if(leftLbl) leftLbl.textContent = `Bitcoin Season (${(100 - altVal).toFixed(0)}%)`;
+        if(rightLbl) rightLbl.textContent = `Altcoin Season (${(+altVal).toFixed(0)}%)`;
+      }
+    }
+
+    // ===========================
+    // Export / Import / Reset manual values
+    // ===========================
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const clearBtn  = document.getElementById('clearBtn');
+
+    exportBtn.onclick = ()=>{
+      const data = readLS();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'manual-indicators.json'; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    importBtn.onclick = ()=>{
+      const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json';
+      inp.onchange = ()=>{
+        const f = inp.files[0]; if(!f) return;
+        const reader = new FileReader();
+        reader.onload = ()=>{ try{ const obj = JSON.parse(reader.result); writeLS(obj); load(); } catch(e){ alert('JSON invalid'); } };
+        reader.readAsText(f);
+      };
+      inp.click();
+    };
+
+    clearBtn.onclick = ()=>{ if(confirm('Ștergi toate valorile manuale salvate?')){ clearManual(); load(); } };
+
+    // Kick off (progressive)
+    load();
+  </script>
+</body>
+</html>
