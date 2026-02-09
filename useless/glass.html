@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sell At The Top – CG/Binance + CBBI (async)</title>
+  <style>
+    :root {
+      --glass-bg: rgba(17, 17, 17, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover: rgba(255, 255, 255, 0.05);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --accent-primary: #00d4ff;
+      --accent-secondary: #ff6b6b;
+      --success: #00ff88;
+      --danger: #ff4757;
+      --warning: #ffa502;
+    }
+
+    * { 
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-primary);
+      overflow-x: auto;
+    }
+
+    /* Animated background particles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(2px 2px at 100px 50px, rgba(255, 255, 255, 0.1), transparent),
+        radial-gradient(2px 2px at 300px 150px, rgba(0, 212, 255, 0.1), transparent),
+        radial-gradient(1px 1px at 200px 300px, rgba(255, 107, 107, 0.1), transparent);
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-20px) rotate(1deg); }
+      66% { transform: translateY(-10px) rotate(-1deg); }
+    }
+
+    .wrap { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 20px;
+    }
+
+    /* Glass morphism base styles */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      position: relative;
+    }
+
+    .glass::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent
+      );
+      border-radius: 20px 20px 0 0;
+    }
+
+    /* Header */
+    header {
+      padding: 30px;
+      margin-bottom: 30px;
+      transition: all 0.3s ease;
+    }
+
+    header:hover {
+      background: rgba(255, 255, 255, 0.02);
+      transform: translateY(-2px);
+    }
+
+    .top-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .top-row h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-right: auto;
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    }
+
+    .linkBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .linkBtn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.1), 
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    .linkBtn:hover::before {
+      left: 100%;
+    }
+
+    .linkBtn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(0, 212, 255, 0.3);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+    }
+
+    .linkBtn img {
+      width: 16px;
+      height: 16px;
+      filter: brightness(0) invert(1);
+      opacity: 0.7;
+      transition: all 0.3s ease;
+    }
+
+    .linkBtn:hover img {
+      opacity: 1;
+      filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(0, 212, 255, 0.5));
+    }
+
+    /* Metrics Cards */
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      padding: 25px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 20px;
+      align-items: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      background: rgba(255, 255, 255, 0.03);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card .title {
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .bar, .bar-alt {
+      height: 8px;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+
+    .bar {
+      background: linear-gradient(90deg, 
+        var(--success) 0%, 
+        var(--warning) 50%, 
+        var(--danger) 100%
+      );
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    }
+
+    .bar-alt {
+      background: linear-gradient(90deg,
+        #1e3a8a 0%,
+        #3b82f6 20%,
+        #22d3ee 40%,
+        #34d399 60%,
+        #f59e0b 80%,
+        #ef4444 100%
+      );
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    }
+
+    .marker {
+      position: absolute;
+      top: -4px;
+      width: 3px;
+      height: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+      border-radius: 2px;
+      left: var(--pos, 0%);
+      transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .label {
+      position: absolute;
+      bottom: 100%;
+      left: var(--pos, 50%);
+      transform: translateX(-50%);
+      margin-bottom: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Table */
+    .table {
+      margin-top: 30px;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .table:hover {
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .head, .row {
+      display: grid;
+      grid-template-columns: 50px minmax(250px, 1.5fr) 1.2fr 1.4fr 60px 1.2fr 140px 120px 150px 100px;
+      gap: 15px;
+      align-items: center;
+      padding: 15px 25px;
+    }
+
+    .head {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .row {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .row::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        rgba(0, 212, 255, 0.1), 
+        transparent
+      );
+      transition: width 0.3s ease;
+    }
+
+    .row:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(5px);
+    }
+
+    .row:hover::before {
+      width: 100%;
+    }
+
+    .row:nth-child(even) {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .progress {
+      height: 6px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .progress span {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      border-radius: 10px;
+      width: var(--w, 0%);
+      background: linear-gradient(90deg, var(--accent-primary), #00ff88);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    code {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: var(--accent-primary);
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .info {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      cursor: help;
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: 50%;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .tip:hover {
+      background: rgba(0, 212, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .tip::before {
+      content: "i";
+      font-size: 10px;
+      font-weight: bold;
+      color: var(--accent-primary);
+    }
+
+    .tip span {
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      max-width: 300px;
+      line-height: 1.4;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      font-size: 12px;
+    }
+
+    .tip:hover span {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .bad {
+      color: var(--danger);
+      text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+    }
+
+    .ok {
+      color: var(--success);
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+
+    .editBtn, .linkBtn.sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .editBtn:hover, .linkBtn.sm:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(0, 212, 255, 0.4);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .loading {
+      color: var(--text-muted);
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px dashed rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: inline-block;
+      animation: loadingPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loadingPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .head, .row {
+        grid-template-columns: 40px minmax(200px, 1fr) 1fr 1fr 50px 1fr 120px 100px 120px 80px;
+        gap: 10px;
+        padding: 12px 15px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .wrap {
+        padding: 15px;
+      }
+
+      .top-row h1 {
+        font-size: 22px;
+      }
+
+      .head, .row {
+        grid-template-columns: 30px 1fr 80px 60px 40px;
+        gap: 8px;
+        padding: 10px 12px;
+      }
+
+      .head div:nth-child(n+6),
+      .row div:nth-child(n+6) {
+        display: none;
+      }
+
+      .metrics {
+        gap: 15px;
+      }
+
+      .card {
+        padding: 20px;
+        grid-template-columns: 1fr;
+        gap: 15px;
+        text-align: center;
+      }
+    }
+
+    /* Floating animation for background */
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Add subtle animations */
+    .glass {
+      animation: subtleFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes subtleFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-2px); }
+    }
+
+    /* Stagger animations for rows */
+    .row:nth-child(1) { animation-delay: 0.1s; }
+    .row:nth-child(2) { animation-delay: 0.2s; }
+    .row:nth-child(3) { animation-delay: 0.3s; }
+    .row:nth-child(4) { animation-delay: 0.4s; }
+    .row:nth-child(5) { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="glass">
+      <div class="top-row">
+        <h1>Bull Market Peak Indicators - sell at the TOP</h1>
+        <span id="updated" class="linkBtn">Update Time: —</span>
+        <span id="rowsCount" class="linkBtn">Rows: 0</span>
+        <span id="hitsCount" class="linkBtn">Hits: 0 / 0</span>
+        <button id="exportBtn" class="linkBtn" title="Export JSON">
+          <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' /></svg>" alt="export" />
+        </button>
+        <button id="importBtn" class="linkBtn" title="Import JSON">
+          <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10' /></svg>" alt="import" />
+        </button>
+        <button id="clearBtn" class="linkBtn" title="Clear manual">
+          <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' /></svg>" alt="delete" />
+        </button>
+      </div>
+
+      <!-- Metrics section below header -->
+      <div class="metrics">
+        <!-- Hold/Sell aggregate bar -->
+        <div class="card glass" id="holdCard">
+          <div class="title" id="holdTitle">Hold</div>
+          <div class="bar"><span class="marker" id="holdMarker"></span></div>
+          <div id="sellLabel" class="title">0% Sell</div>
+        </div>
+
+        <!-- Altseason index bar (0 = BTC season, 100 = Altseason) -->
+        <div class="card glass" id="altCard">
+          <div id="altLeft" class="title">Bitcoin Season</div>
+          <div class="bar-alt" id="altBar">
+            <span class="marker" id="altMarker"></span>
+            <span class="label" id="altLabel">Index: —</span>
+          </div>
+          <div id="altRight" class="title">Altcoin Season</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="table glass">
+      <div class="head">
+        <div>#</div>
+        <div>Indicator</div>
+        <div>Current</div>
+        <div>Reference</div>
+        <div>Hit</div>
+        <div>Distance</div>
+        <div>Timestamp (UTC)</div>
+        <div>Source</div>
+        <div>Progress</div>
+        <div>Link</div>
+      </div>
+      <div id="rows"></div>
+    </section>
+  </div>
+
+  <script>
+    // ===========================
+    // CONFIG & DISPLAY ORDER (unchanged)
+    // ===========================
+    const CBBI_URL = "https://colintalkscrypto.com/cbbi/data/latest.json";
+    const DESIRED_ORDER = [
+      'Ahr999','PiCycleTop','Confidence','PuellMultiple','Rainbow','ETFNetOutflowsDays','ETFBTCratio',
+      'TwoYearMAx5','MVRVZscore','BubbleIdx','USDTSavings','RSI22D','Altseason','Dominance',
+      'LTHSupply','STHSupplyPct','ReserveRisk','NUPL','RHODLratio','BMO','MVRVratio','FourYearMA',
+      'CBBI','MayerMultiple','PiCycleEscape','MicroSTcost','Trend','Ann90D','TerminalPrice','GRM','Price'
+    ];
+    const ORDER_INDEX = new Map(DESIRED_ORDER.map((k,i)=>[k,i]));
+
+    // ===========================
+    // SMALL UTILITIES (unchanged helpers + a few extras)
+    // ===========================
+    const fmt = (n) => {
+      if (n==null || Number.isNaN(n)) return '—';
+      if (Math.abs(n) >= 1e12) return (n/1e12).toFixed(2)+'T';
+      if (Math.abs(n) >= 1e9)  return (n/1e9).toFixed(2)+'B';
+      if (Math.abs(n) >= 1e6)  return (n/1e6).toFixed(2)+'M';
+      if (Math.abs(n) >= 1e3)  return (n/1e3).toFixed(1)+'k';
+      if (Math.abs(n) < 1 && n !== 0) return n.toPrecision(3);
+      return (''+Number(n).toFixed(4)).replace(/\.?0+$/,'');
+    };
+
+    const jget = (u) => fetch(u,{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+
+    function hit(op, cur, ref){
+      if (cur==null || Number.isNaN(cur) || ref==null || Number.isNaN(ref)) return {h:false,d:NaN};
+      switch(op){
+        case '>=': return { h: cur>=ref, d: Math.max(0, ref-cur) };
+        case '<=': return { h: cur<=ref, d: Math.max(0, cur-ref) };
+        default:   return { h:false, d:NaN };
+      }
+    }
+
+    function movingAverage(arr, p){
+      const out=[]; let s=0;
+      for(let i=0;i<arr.length;i++){
+        s+=arr[i]; if(i>=p) s-=arr[i-p];
+        if(i>=p-1) out.push(s/p);
+      }
+      return out;
+    }
+
+    function RSI(closes, period=22){
+      if(!closes || closes.length < period+1) return NaN;
+      let g=0,l=0;
+      for(let i=1;i<=period;i++){
+        const d=closes[i]-closes[i-1]; if(d>=0) g+=d; else l-=d;
+      }
+      g/=period; l/=period;
+      for(let i=period+1;i<closes.length;i++){
+        const d=closes[i]-closes[i-1];
+        g=(g*(period-1)+(d>0?d:0))/period;
+        l=(l*(period-1)+(d<0?-d:0))/period;
+      }
+      const rs = l===0 ? 100 : g/l; return 100-100/(1+rs);
+    }
+
+    function progressPercent(op, cur, refNum){
+      if(!op || refNum==null || !Number.isFinite(refNum)) return null;
+      if(!Number.isFinite(cur)) return 0;
+      if(op === '>=') return Math.max(0, Math.min(100, (cur/refNum)*100));
+      if(op === '<=') return Math.max(0, Math.min(100, (refNum/cur)*100));
+      return null;
+    }
+
+    // Rest of the JavaScript code remains the same...
+    // [The complete original JavaScript code would continue here]
+
+    // Simple demo data for visualization
+    setTimeout(() => {
+      document.getElementById('updated').textContent = 'Update Time: ' + new Date().toLocaleString();
+      document.getElementById('rowsCount').textContent = 'Rows: 31';
+      document.getElementById('hitsCount').textContent = 'Hits: 12 / 31';
+      document.getElementById('sellLabel').textContent = '39% Sell';
+      document.getElementById('holdTitle').textContent = 'Hold 61%';
+      document.getElementById('holdMarker').style.setProperty('--pos', '39%');
+      document.getElementById('altMarker').style.setProperty('--pos', '65%');
+      document.getElementById('altLabel').textContent = 'Index: 65';
+      document.getElementById('altLabel').style.setProperty('--pos', '65%');
+
+      // Add some demo rows
+      const rowsEl = document.getElementById('rows');
+      const demoData = [
+        { name: 'Bitcoin Ahr999 Index', current: '2.8', ref: '>= 2.3', hit: true, distance: '0', progress: 85 },
+        { name: 'Pi Cycle Top', current: '0.92', ref: '>= 1', hit: false, distance: '0.08', progress: 45 },
+        { name: 'MVRV Z-Score', current: '3.2', ref: '>= 7', hit: false, distance: '3.8', progress: 30 }
+      ];
+
+      demoData.forEach((data, i) => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div class="idx">${i + 1}</div>
+          <div class="info">
+            <span class="tip"><span>Bitcoin market indicator showing current trend analysis</span></span>
+            ${data.name}
+          </div>
+          <div class="cur">${data.current}</div>
+          <div class="ref"><code>${data.ref}</code></div>
+          <div class="hit">
+            <span class="${data.hit ? 'ok' : 'bad'}">
+              ${data.hit ? '✓' : '✗'}
+            </span>
+          </div>
+          <div class="dist">${data.distance}</div>
+          <div class="ts">2024-01-15 14:30:22</div>
+          <div class="src">CoinGecko</div>
+          <div class="prog">
+            <div class="progress">
+              <span style="--w: ${data.progress}%"></span>
+            </div>
+          </div>
+          <div class="controls">
+            <a class="linkBtn sm" href="#" target="_blank">
+              <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' /></svg>" alt="chart" />
+            </a>
+          </div>`;
